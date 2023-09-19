@@ -8,7 +8,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription([
         # パラメータの設定
-        DeclareLaunchArgument('param_file', default_value='param/yp-spur.param', description='Parameter file path'),
+        DeclareLaunchArgument('param_file', default_value='../param/yp-spur.param', description='Parameter file path'),
         DeclareLaunchArgument('port', default_value='/dev/ttyACM0', description='Serial port path'),
 
         # ypspur_ros2 ノードの起動
