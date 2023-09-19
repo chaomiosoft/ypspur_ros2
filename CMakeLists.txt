@@ -48,6 +48,7 @@ target_link_libraries(ypspur_bridge
 rosidl_target_interfaces(ypspur_bridge ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 install(TARGETS ypspur_bridge DESTINATION lib/${PROJECT_NAME})
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
