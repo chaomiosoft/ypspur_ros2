@@ -13,7 +13,7 @@ This project is developping in progress.
 This Node has a only "/cmd_vel" subscriber.
 
 ## Build
-$ colcon build --pacages-up-to ypspur_ros2
+$ colcon build --packages-up-to ypspur_ros2
 
 ## Run
 $ ros2 run ypspur_ros2 ypspur_bridge
