@@ -54,7 +54,7 @@ private:
   std::shared_ptr<rclcpp::Publisher<nav_msgs::msg::Odometry>> publisher_odom_;
   std::map<int, rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr> publishers_ads_;
   std::map<int, rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr> publishers_dios_;
-  std::shared_ptr<rclcpp::Subscription<geometry_msgs::msg::Twist>> subscriber_cmd_vel_;
+  rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr subscriber_cmd_vel_;
   tf2_ros::TransformBroadcaster tf_broadcaster_;
   const tf2::Vector3 z_axis_;
 
@@ -332,7 +332,7 @@ public:
       // publish odom 
       this->publisher_odom_ = this->create_publisher<nav_msgs::msg::Odometry>("odom", 1);
       // subscribe cmd_vel
-      this->create_subscription<geometry_msgs::msg::Twist>(std::string("cmd_vel"), rclcpp::QoS(1), std::bind(&YpspurRosNode::cbCmdVel, this, std::placeholders::_1));
+      this->subscriber_cmd_vel_ = this->create_subscription<geometry_msgs::msg::Twist>(std::string("cmd_vel"), rclcpp::QoS(1), std::bind(&YpspurRosNode::cbCmdVel, this, std::placeholders::_1));
       
       this->declare_parameter<bool>("avoid_publishing_duplicated_odom", true);
       this->get_parameter("avoid_publishing_duplicated_odom", this->avoid_publishing_duplicated_odom_);
