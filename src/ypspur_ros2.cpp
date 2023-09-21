@@ -99,6 +99,7 @@ void YpspurRosNode::updateDiagnostics(const rclcpp::Time& now, const bool connec
     //pubs_["diag"].publish(msg);
     this->device_error_state_ = 0;
   }
+}
 
 YpspurRosNode::YpspurRosNode() : Node("ypspur_ros2")
   , tf_broadcaster_(this)
