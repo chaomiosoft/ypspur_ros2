@@ -36,7 +36,6 @@ void YpspurRosNode::cbCmdVel(const geometry_msgs::msg::Twist::SharedPtr msg)
 
 void YpspurRosNode::updateDiagnostics(const rclcpp::Time& now, const bool connection_down)
 {
-  RCLCPP_INFO(this->get_logger(), "updateDiagnostics()");
   const int connection_error = connection_down ? 1 : YP::YP_get_error_state();
   double t = 0;
 
@@ -100,8 +99,6 @@ void YpspurRosNode::updateDiagnostics(const rclcpp::Time& now, const bool connec
     //pubs_["diag"].publish(msg);
     this->device_error_state_ = 0;
   }
-  RCLCPP_INFO(this->get_logger(), "updateDiagnostics() end");
-}
 
 YpspurRosNode::YpspurRosNode() : Node("ypspur_ros2")
   , tf_broadcaster_(this)
