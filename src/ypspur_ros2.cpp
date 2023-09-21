@@ -65,7 +65,7 @@ void YpspurRosNode::updateDiagnostics(const rclcpp::Time& now, const bool connec
       }
       else
       {
-        if (rclcpp::Time(t, RCL_ROS_TIME) < now - rclcpp::Duration(1.0))
+        if (rclcpp::Time(t, 0, RCL_ROS_TIME) < now - rclcpp::Duration(1.0))
         {
           msg.status[0].level = diagnostic_msgs::msg::DiagnosticStatus::ERROR;
           msg.status[0].message = "Motor controller doesn't "
@@ -477,7 +477,7 @@ void YpspurRosNode::spinThreadFunction(std::shared_ptr<YpspurRosNode> &node)
           if (t <= 0.0)
             break;
         }
-        wrench.header.stamp = rclcpp::Time(t, RCL_ROS_TIME);
+        wrench.header.stamp = rclcpp::Time(t, 0, RCL_ROS_TIME);
         wrench.wrench.force.y = 0;
         wrench.wrench.force.z = 0;
         wrench.wrench.torque.x = 0;
