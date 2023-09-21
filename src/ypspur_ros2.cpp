@@ -36,6 +36,7 @@ void YpspurRosNode::cbCmdVel(const geometry_msgs::msg::Twist::SharedPtr msg)
 
 void YpspurRosNode::updateDiagnostics(const rclcpp::Time& now, const bool connection_down)
 {
+  RCLCPP_INFO(this->get_logger(), "updateDiagnostics()");
   const int connection_error = connection_down ? 1 : YP::YP_get_error_state();
   double t = 0;
 
@@ -99,6 +100,7 @@ void YpspurRosNode::updateDiagnostics(const rclcpp::Time& now, const bool connec
     //pubs_["diag"].publish(msg);
     this->device_error_state_ = 0;
   }
+  RCLCPP_INFO(this->get_logger(), "updateDiagnostics() end");
 }
 
 YpspurRosNode::YpspurRosNode() : Node("ypspur_ros2")
@@ -456,8 +458,7 @@ void YpspurRosNode::spinThreadFunction(std::shared_ptr<YpspurRosNode> &node)
           odom.twist.twist.angular.z = w;
           //pubs_["odom"].publish(odom);
           this->publisher_odom_->publish(odom);
-          RCLCPP_INFO(node->get_logger(), "x=%f, y=%f, v=%f, w=%f", x, y, v, w);
-
+          
           if (this->publish_odom_tf_)
           {
             odom_trans.header.stamp = current_stamp + rclcpp::Duration(tf_time_offset_);
