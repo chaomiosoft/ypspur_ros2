@@ -65,7 +65,7 @@ void YpspurRosNode::updateDiagnostics(const rclcpp::Time& now, const bool connec
       }
       else
       {
-        if (rclcpp::Time(t) < now - rclcpp::Duration(1.0))
+        if (rclcpp::Time(t, RCL_ROS_TIME) < now - rclcpp::Duration(1.0))
         {
           msg.status[0].level = diagnostic_msgs::msg::DiagnosticStatus::ERROR;
           msg.status[0].message = "Motor controller doesn't "
@@ -110,6 +110,7 @@ YpspurRosNode::YpspurRosNode() : Node("ypspur_ros2")
   this->device_error_state_time_ = rclcpp::Clock(RCL_ROS_TIME).now();
   this->avoid_publishing_duplicated_odom_ =  true;
   this->publish_odom_tf_ = true;
+  this->previous_odom_stamp_ = rclcpp::Time(0L, RCL_ROS_TIME);
 
   this->declare_parameter<std::string>("port", "/dev/ttyACM0");
   this->get_parameter("port", this->port_);
@@ -442,7 +443,7 @@ void YpspurRosNode::spinThreadFunction(std::shared_ptr<YpspurRosNode> &node)
           y = odom.pose.pose.position.y + dt * v * sinf(yaw);
         }
 
-        const rclcpp::Time current_stamp(t);
+        const rclcpp::Time current_stamp(t, 0, RCL_ROS_TIME);
         if (!this->avoid_publishing_duplicated_odom_ || (current_stamp > this->previous_odom_stamp_))
         {
           odom.header.stamp = current_stamp;
@@ -476,7 +477,7 @@ void YpspurRosNode::spinThreadFunction(std::shared_ptr<YpspurRosNode> &node)
           if (t <= 0.0)
             break;
         }
-        wrench.header.stamp = rclcpp::Time(t);
+        wrench.header.stamp = rclcpp::Time(t, RCL_ROS_TIME);
         wrench.wrench.force.y = 0;
         wrench.wrench.force.z = 0;
         wrench.wrench.torque.x = 0;
