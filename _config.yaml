@@ -1,4 +1,7 @@
-theme: jekyll-theme-hacker
 gtag: G-LXV11T76CH
 plugins:
   - jekyll-sitemap
+sitemap:
+  path: sitemap.xml
+  template: ./sitemap_template.xml
+  rel: false
