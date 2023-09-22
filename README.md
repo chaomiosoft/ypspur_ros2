@@ -17,5 +17,7 @@ $ colcon build --packages-up-to ypspur_ros2 --symlink-install
 
 ## Run
 $ ros2 run ypspur_ros2 ypspur_bridge
+
 or
+
 $ ros2 launch ypspur_ros2 ypspur_ros2.py
