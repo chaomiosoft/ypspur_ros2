@@ -1,4 +1,4 @@
 theme: jekyll-theme-hacker
-gtag: "G-LXV11T76CH"
+gtag: G-LXV11T76CH
 plugins:
   - jekyll-sitemap
