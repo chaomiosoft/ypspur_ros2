@@ -13,7 +13,9 @@ This project is developping in progress.
 This Node has a only "/cmd_vel" subscriber.
 
 ## Build
-$ colcon build --packages-up-to ypspur_ros2
+$ colcon build --packages-up-to ypspur_ros2 --symlink-install
 
 ## Run
 $ ros2 run ypspur_ros2 ypspur_bridge
+or
+$ ros2 launch ypspur_ros2 ypspur_ros2.py
