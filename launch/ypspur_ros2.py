@@ -15,6 +15,22 @@ def generate_launch_description():
         DeclareLaunchArgument('simulate_control', default_value='true', description='Simulate Device'),
         DeclareLaunchArgument('param_file', default_value=ypspur_ros2_ypspur_param_dir, description='Parameter file path'),
         DeclareLaunchArgument('port', default_value='/tmp/ttyACM0', description='Serial port path'),
+        DeclareLaunchArgument('ad0_enable', default_value='false', description='A/D Input0 Enable'),
+        DeclareLaunchArgument('ad1_enable', default_value='false', description='A/D Input1 Enable'),
+        DeclareLaunchArgument('ad2_enable', default_value='false', description='A/D Input2 Enable'),
+        DeclareLaunchArgument('ad3_enable', default_value='false', description='A/D Input3 Enable'),
+        DeclareLaunchArgument('ad4_enable', default_value='false', description='A/D Input4 Enable'),
+        DeclareLaunchArgument('ad5_enable', default_value='false', description='A/D Input5 Enable'),
+        DeclareLaunchArgument('ad6_enable', default_value='false', description='A/D Input6 Enable'),
+        DeclareLaunchArgument('ad7_enable', default_value='false', description='A/D Input7 Enable'),
+        DeclareLaunchArgument('dio0_enable', default_value='false', description='DigitalInput0 Enable'),
+        DeclareLaunchArgument('dio1_enable', default_value='false', description='DigitalInput1 Enable'),
+        DeclareLaunchArgument('dio2_enable', default_value='false', description='DigitalInput2 Enable'),
+        DeclareLaunchArgument('dio3_enable', default_value='false', description='DigitalInput3 Enable'),
+        DeclareLaunchArgument('dio4_enable', default_value='false', description='DigitalInput4 Enable'),
+        DeclareLaunchArgument('dio5_enable', default_value='false', description='DigitalInput5 Enable'),
+        DeclareLaunchArgument('dio6_enable', default_value='false', description='DigitalInput6 Enable'),
+        DeclareLaunchArgument('dio7_enable', default_value='false', description='DigitalInput7 Enable'),
 
         # ypspur_ros2 ノードの起動
         Node(
@@ -25,7 +41,16 @@ def generate_launch_description():
             parameters=[                  # パラメータの設定
                 {'param_file': LaunchConfiguration('param_file')},
                 {'port': LaunchConfiguration('port')},
-                {'simulate_control': LaunchConfiguration('simulate_control')}
+                {'simulate_control': LaunchConfiguration('simulate_control')},
+                {'ad7_enable': LaunchConfiguration('ad7_enable')},
+                {'dio0_enable': LaunchConfiguration('dio0_enable')},
+                {'dio1_enable': LaunchConfiguration('dio1_enable')},
+                {'dio2_enable': LaunchConfiguration('dio2_enable')},
+                {'dio3_enable': LaunchConfiguration('dio3_enable')},
+                {'dio4_enable': LaunchConfiguration('dio4_enable')},
+                {'dio5_enable': LaunchConfiguration('dio5_enable')},
+                {'dio6_enable': LaunchConfiguration('dio6_enable')},
+                {'dio7_enable': LaunchConfiguration('dio7_enable')},
             ]
         )
     ])

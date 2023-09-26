@@ -27,19 +27,24 @@ find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(builtin_interfaces REQUIRED)
 
 set(msg_files
   "msg/ControlMode.msg"
+  "msg/DigitalOutput.msg"
+  "msg/DigitalInput.msg"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
+  DEPENDENCIES builtin_interfaces std_msgs
 )
 
 ament_export_dependencies(rosidl_default_runtime)
 
 add_executable(ypspur_bridge src/ypspur_ros2.cpp)
-ament_target_dependencies(ypspur_bridge rclcpp Boost ypspur tf2_ros tf2_msgs nav_msgs geometry_msgs)
+ament_target_dependencies(ypspur_bridge rclcpp Boost ypspur tf2_ros tf2_msgs nav_msgs geometry_msgs std_msgs)
 
 target_link_libraries(ypspur_bridge
   ${Boost_LIBRARIES}

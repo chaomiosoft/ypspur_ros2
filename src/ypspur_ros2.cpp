@@ -33,6 +33,95 @@ void YpspurRosNode::cbCmdVel(const geometry_msgs::msg::Twist::SharedPtr msg)
     YP::YPSpur_vel(msg->linear.x, msg->angular.z);
   }
 }
+void YpspurRosNode::cbDigitalOutput0(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg)
+{
+  this->cbDigitalOutput(msg, 0);
+}
+void YpspurRosNode::cbDigitalOutput1(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg)
+{
+  this->cbDigitalOutput(msg, 1);
+}
+void YpspurRosNode::cbDigitalOutput2(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg)
+{
+  this->cbDigitalOutput(msg, 2);
+}
+void YpspurRosNode::cbDigitalOutput3(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg)
+{
+  this->cbDigitalOutput(msg, 3);
+}
+void YpspurRosNode::cbDigitalOutput4(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg)
+{
+  this->cbDigitalOutput(msg, 4);
+}
+void YpspurRosNode::cbDigitalOutput5(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg)
+{
+  this->cbDigitalOutput(msg, 5);
+}
+void YpspurRosNode::cbDigitalOutput6(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg)
+{
+  this->cbDigitalOutput(msg, 6);
+}
+void YpspurRosNode::cbDigitalOutput7(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg)
+{
+  this->cbDigitalOutput(msg, 7);
+}
+void YpspurRosNode::cbDigitalOutput(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg, int id_)
+{
+  const auto dio_output_prev = this->dio_output_;
+  const auto dio_dir_prev = this->dio_dir_;
+  const unsigned int mask = 1 << id_;
+
+  switch (msg->output)
+  {
+  case ypspur_ros2::msg::DigitalOutput::HIGH_IMPEDANCE:
+    this->dio_output_ &= ~mask;
+    this->dio_dir_ &= ~mask;
+    break;
+  case ypspur_ros2::msg::DigitalOutput::LOW:
+    this->dio_output_ &= ~mask;
+    this->dio_dir_ |= mask;
+    break;
+  case ypspur_ros2::msg::DigitalOutput::HIGH:
+    this->dio_output_ |= mask;
+    this->dio_dir_ |= mask;
+    break;
+  case ypspur_ros2::msg::DigitalOutput::PULL_UP:
+    this->dio_output_ |= mask;
+    this->dio_dir_ &= ~mask;
+    break;
+  case ypspur_ros2::msg::DigitalOutput::PULL_DOWN:
+    RCLCPP_ERROR(this->get_logger(), "Digital IO pull down is not supported on this system");
+    break;
+  }
+  if (this->dio_output_ != dio_output_prev)
+    YP::YP_set_io_data(this->dio_output_);
+  if (this->dio_dir_ != dio_dir_prev)
+    YP::YP_set_io_dir(this->dio_dir_);
+
+  if (msg->toggle_time.sec > 0 || msg->toggle_time.nanosec > 0)
+  {
+    this->dio_revert_[id_] = rclcpp::Clock(RCL_ROS_TIME).now() + msg->toggle_time;
+  }
+}
+
+void YpspurRosNode::revertDigitalOutput(int id_)
+{
+  const auto dio_output_prev = this->dio_output_;
+  const auto dio_dir_prev = this->dio_dir_;
+  const unsigned int mask = 1 << id_;
+
+  this->dio_output_ &= ~mask;
+  this->dio_output_ |= this->dio_output_default_ & mask;
+  this->dio_dir_ &= ~mask;
+  this->dio_dir_ |= this->dio_output_default_ & mask;
+
+  if (this->dio_output_ != dio_output_prev)
+    YP::YP_set_io_data(dio_output_);
+  if (this->dio_dir_ != dio_dir_prev)
+    YP::YP_set_io_dir(dio_dir_);
+
+  this->dio_revert_[id_] = rclcpp::Time(0);
+}
 
 void YpspurRosNode::updateDiagnostics(const rclcpp::Time& now, const bool connection_down)
 {
@@ -171,7 +260,75 @@ YpspurRosNode::YpspurRosNode() : Node("ypspur_ros2")
       const std::string key_name2 = std::string("dio") + std::to_string(i) + std::string("_name");
       this->declare_parameter<std::string>(key_name2, std::string(std::string("dio") + std::to_string(i)));
       this->get_parameter(key_name2, param.name_);
-      // 以降のdioは必要あれば実装する・・・
+      const std::string key_name3 = std::string("dio") + std::to_string(i) + std::string("_output");
+      this->declare_parameter<bool>(key_name3, true);
+      this->get_parameter(key_name3, param.output_);
+      const std::string key_name4 = std::string("dio") + std::to_string(i) + std::string("_input");
+      this->declare_parameter<bool>(key_name4, false);
+      this->get_parameter(key_name4, param.input_);
+      
+      if (param.output_)
+      {
+        if (i == 0)
+          this->subscriber_dio_[i] = this->create_subscription<ypspur_ros2::msg::DigitalOutput>(
+            param.name_, 1, std::bind(&YpspurRosNode::cbDigitalOutput0, this, std::placeholders::_1)
+          );
+        else if (i == 1)
+          this->subscriber_dio_[i] = this->create_subscription<ypspur_ros2::msg::DigitalOutput>(
+            param.name_, 1, std::bind(&YpspurRosNode::cbDigitalOutput1, this, std::placeholders::_1)
+          );
+        else if (i == 2)
+          this->subscriber_dio_[i] = this->create_subscription<ypspur_ros2::msg::DigitalOutput>(
+            param.name_, 1, std::bind(&YpspurRosNode::cbDigitalOutput2, this, std::placeholders::_1)
+          );
+        else if (i == 3)
+          this->subscriber_dio_[i] = this->create_subscription<ypspur_ros2::msg::DigitalOutput>(
+            param.name_, 1, std::bind(&YpspurRosNode::cbDigitalOutput3, this, std::placeholders::_1)
+          );
+        else if (i == 4)
+          this->subscriber_dio_[i] = this->create_subscription<ypspur_ros2::msg::DigitalOutput>(
+            param.name_, 1, std::bind(&YpspurRosNode::cbDigitalOutput4, this, std::placeholders::_1)
+          );
+        else if (i == 5)
+          this->subscriber_dio_[i] = this->create_subscription<ypspur_ros2::msg::DigitalOutput>(
+            param.name_, 1, std::bind(&YpspurRosNode::cbDigitalOutput5, this, std::placeholders::_1)
+          );
+        else if (i == 6)
+          this->subscriber_dio_[i] = this->create_subscription<ypspur_ros2::msg::DigitalOutput>(
+            param.name_, 1, std::bind(&YpspurRosNode::cbDigitalOutput6, this, std::placeholders::_1)
+          );
+        else if (i == 7)
+          this->subscriber_dio_[i] = this->create_subscription<ypspur_ros2::msg::DigitalOutput>(
+            param.name_, 1, std::bind(&YpspurRosNode::cbDigitalOutput7, this, std::placeholders::_1)
+          );
+      }
+
+      std::string output_default;
+      std::string default_key_name = std::string("dio") + std::to_string(i) + std::string("_default");
+      this->declare_parameter<std::string>(default_key_name, std::string("HIGH_IMPEDANCE"));
+      this->get_parameter(default_key_name, output_default);
+      if (output_default.compare("HIGH_IMPEDANCE") == 0)
+      {
+      }
+      else if (output_default.compare("LOW") == 0)
+      {
+        this->dio_dir_default_ |= 1 << i;
+      }
+      else if (output_default.compare("HIGH") == 0)
+      {
+        this->dio_dir_default_ |= 1 << i;
+        this->dio_output_default_ |= 1 << i;
+      }
+      else if (output_default.compare("PULL_UP") == 0)
+      {
+        this->dio_output_default_ |= 1 << i;
+      }
+      else if (output_default.compare("PULL_DOWN") == 0)
+      {
+        RCLCPP_ERROR(this->get_logger(), "Digital IO pull down is not supported on this system");
+      }
+      if (param.input_)
+        this->digital_input_enable_ = true;
     }
     dios_[i] = param;
   }
@@ -180,6 +337,7 @@ YpspurRosNode::YpspurRosNode() : Node("ypspur_ros2")
   if (this->digital_input_enable_)
   {
     // publish 
+    this->publisher_digital_input_ = this->create_publisher<ypspur_ros2::msg::DigitalInput>("digital_input", 2);
   }
 
   this->declare_parameter<std::string>("odom_id", std::string("odom"));
@@ -506,12 +664,32 @@ void YpspurRosNode::spinThreadFunction(std::shared_ptr<YpspurRosNode> &node)
 
       if (this->digital_input_enable_)
       {
-        // 未実装
+        ypspur_ros2::msg::DigitalInput din;
+
+        din.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
+        int in = YP::YP_get_ad_value(15);
+        for (int i = 0; i < this->dio_num_; i++)
+        {
+          if (!this->dios_[i].enable_)
+            continue;
+          din.name.push_back(this->dios_[i].name_);
+          if (in & (1 << i))
+            din.state.push_back(true);
+          else
+            din.state.push_back(false);
+        }
+        this->publisher_digital_input_->publish(din);
       }
 
       for (int i = 0; i < this->dio_num_; i++)
       {
-        // 未実装
+        if (this->dio_revert_[i] != rclcpp::Time(0))
+        {
+          if (this->dio_revert_[i] < now)
+          {
+            this->revertDigitalOutput(i);
+          }
+        }
       }
       this->updateDiagnostics(rclcpp::Clock(RCL_ROS_TIME).now());
 

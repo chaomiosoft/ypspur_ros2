@@ -8,9 +8,13 @@
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <std_msgs/msg/float32.hpp>
+#include <std_msgs/msg/header.hpp>
+#include <builtin_interfaces/msg/duration.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 #include <ypspur_ros2/msg/control_mode.hpp>
+#include <ypspur_ros2/msg/digital_output.hpp>
+#include <ypspur_ros2/msg/digital_input.hpp>
 
 #include <tf2/utils.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -47,6 +51,8 @@ public: // private:
   std::map<int, rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr> publishers_ads_;
   std::map<int, rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr> publishers_dios_;
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr subscriber_cmd_vel_;
+  std::map<int, rclcpp::Subscription<ypspur_ros2::msg::DigitalOutput>::SharedPtr> subscriber_dio_;
+  std::shared_ptr<rclcpp::Publisher<ypspur_ros2::msg::DigitalInput>> publisher_digital_input_;
   tf2_ros::TransformBroadcaster tf_broadcaster_;
   const tf2::Vector3 z_axis_;
 
@@ -138,6 +144,18 @@ public: // private:
   void cbControlMode(const ypspur_ros2::msg::ControlMode::ConstSharedPtr msg);
 
   void cbCmdVel(const geometry_msgs::msg::Twist::SharedPtr msg);
+
+  void cbDigitalOutput0(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg);
+  void cbDigitalOutput1(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg);
+  void cbDigitalOutput2(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg);
+  void cbDigitalOutput3(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg);
+  void cbDigitalOutput4(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg);
+  void cbDigitalOutput5(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg);
+  void cbDigitalOutput6(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg);
+  void cbDigitalOutput7(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg);
+  void cbDigitalOutput(const ypspur_ros2::msg::DigitalOutput::SharedPtr msg, int id_);
+
+  void revertDigitalOutput(int id_);
 
   void updateDiagnostics(const rclcpp::Time& now, const bool connection_down = false);
 
