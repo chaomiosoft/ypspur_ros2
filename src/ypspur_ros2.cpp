@@ -120,19 +120,18 @@ void YpspurRosNode::revertDigitalOutput(int id_)
   if (this->dio_dir_ != dio_dir_prev)
     YP::YP_set_io_dir(dio_dir_);
 
-  this->dio_revert_[id_] = rclcpp::Time(0);
+  this->dio_revert_[id_] = rclcpp::Time(0L, RCL_ROS_TIME);
 }
 
-void YpspurRosNode::updateDiagnostics(const rclcpp::Time& now, const bool connection_down)
+void YpspurRosNode::updateDiagnostics(const rclcpp::Time now, const bool connection_down)
 {
   const int connection_error = connection_down ? 1 : YP::YP_get_error_state();
-  double t = 0;
+  double t = 0.0;
 
   int err = 0;
   if (!connection_error)
     t = YP::YP_get_device_error_state(0, &err);
   this->device_error_state_ |= err;
-
   if (this->device_error_state_time_ + rclcpp::Duration(1.0) < now || connection_down ||
       this->device_error_state_ != this->device_error_state_prev_)
   {
@@ -146,7 +145,7 @@ void YpspurRosNode::updateDiagnostics(const rclcpp::Time& now, const bool connec
     msg.status[0].hardware_id = "ipc-key" + std::to_string(this->key_);
     if (this->device_error_state_ == 0 && connection_error == 0)
     {
-      if (t == 0)
+      if (t <= 0.0)
       {
         msg.status[0].level = diagnostic_msgs::msg::DiagnosticStatus::OK;
         msg.status[0].message = "Motor controller doesn't "
@@ -154,7 +153,7 @@ void YpspurRosNode::updateDiagnostics(const rclcpp::Time& now, const bool connec
       }
       else
       {
-        if (rclcpp::Time(t, 0, RCL_ROS_TIME) < now - rclcpp::Duration(1.0))
+        if (rclcpp::Time((int64_t)(t * 1000000.0), RCL_ROS_TIME) < now - rclcpp::Duration(1.0))
         {
           msg.status[0].level = diagnostic_msgs::msg::DiagnosticStatus::ERROR;
           msg.status[0].message = "Motor controller doesn't "
@@ -564,7 +563,6 @@ void YpspurRosNode::spinThreadFunction(std::shared_ptr<YpspurRosNode> &node)
     {
       const auto now = rclcpp::Clock(RCL_ROS_TIME).now();
       const float dt = 1.0 / this->params_["hz"];
-
       if (this->cmd_vel_ && this->cmd_vel_expire_ > rclcpp::Duration(0))
       {
         if (this->cmd_vel_time_ + this->cmd_vel_expire_ < now)
@@ -575,7 +573,6 @@ void YpspurRosNode::spinThreadFunction(std::shared_ptr<YpspurRosNode> &node)
             YP::YPSpur_vel(0.0, 0.0);
         }
       }
-
       if (this->mode_ == DIFF)
       {
         double x, y, yaw, v(0), w(0);
@@ -590,7 +587,7 @@ void YpspurRosNode::spinThreadFunction(std::shared_ptr<YpspurRosNode> &node)
         }
         else
         {
-          t = rclcpp::Clock(RCL_ROS_TIME).now().seconds();
+          t = ((double)rclcpp::Clock(RCL_ROS_TIME).now().nanoseconds()) / 1000000.0;
           if (this->cmd_vel_)
           {
             v = this->cmd_vel_->linear.x;
@@ -600,8 +597,7 @@ void YpspurRosNode::spinThreadFunction(std::shared_ptr<YpspurRosNode> &node)
           x = odom.pose.pose.position.x + dt * v * cosf(yaw);
           y = odom.pose.pose.position.y + dt * v * sinf(yaw);
         }
-
-        const rclcpp::Time current_stamp(t, 0, RCL_ROS_TIME);
+        const rclcpp::Time current_stamp((int64_t)(t * 1000000.0), RCL_ROS_TIME);
         if (!this->avoid_publishing_duplicated_odom_ || (current_stamp > this->previous_odom_stamp_))
         {
           odom.header.stamp = current_stamp;
@@ -630,15 +626,15 @@ void YpspurRosNode::spinThreadFunction(std::shared_ptr<YpspurRosNode> &node)
 
         if (!this->simulate_control_)
         {
-          t = YP::YPSpur_get_force(&wrench.wrench.force.x, &wrench.wrench.torque.z);
-          if (t <= 0.0)
-            break;
+          //t = YP::YPSpur_get_force(&wrench.wrench.force.x, &wrench.wrench.torque.z);
+          //if (t <= 0.0)
+          //  break;
         }
-        wrench.header.stamp = rclcpp::Time(t, 0, RCL_ROS_TIME);
-        wrench.wrench.force.y = 0;
-        wrench.wrench.force.z = 0;
-        wrench.wrench.torque.x = 0;
-        wrench.wrench.torque.y = 0;
+        //wrench.header.stamp = rclcpp::Time(t, 0, RCL_ROS_TIME);
+        //wrench.wrench.force.y = 0;
+        //wrench.wrench.force.z = 0;
+        //wrench.wrench.torque.x = 0;
+        //wrench.wrench.torque.y = 0;
         //pubs_["wrench"].publish(wrench);
         // ここは未実装とする
 
@@ -661,7 +657,6 @@ void YpspurRosNode::spinThreadFunction(std::shared_ptr<YpspurRosNode> &node)
           this->publishers_ads_[i]->publish(ad);
         }
       }
-
       if (this->digital_input_enable_)
       {
         ypspur_ros2::msg::DigitalInput din;
@@ -683,7 +678,7 @@ void YpspurRosNode::spinThreadFunction(std::shared_ptr<YpspurRosNode> &node)
 
       for (int i = 0; i < this->dio_num_; i++)
       {
-        if (this->dio_revert_[i] != rclcpp::Time(0))
+        if (this->dio_revert_[i].seconds() != 0.0 && this->dio_revert_[i].nanoseconds() != 0.0)
         {
           if (this->dio_revert_[i] < now)
           {
@@ -723,7 +718,6 @@ void YpspurRosNode::spinThreadFunction(std::shared_ptr<YpspurRosNode> &node)
       }
     }
     RCLCPP_INFO(this->get_logger(), "ypspur_ros main loop terminated");
-
     if (YP::YP_get_error_state())
     {
       RCLCPP_ERROR(this->get_logger(), "ypspur-coordinator is not active");

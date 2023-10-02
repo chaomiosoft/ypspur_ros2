@@ -157,7 +157,7 @@ public: // private:
 
   void revertDigitalOutput(int id_);
 
-  void updateDiagnostics(const rclcpp::Time& now, const bool connection_down = false);
+  void updateDiagnostics(const rclcpp::Time now, const bool connection_down = false);
 
 
 public:
