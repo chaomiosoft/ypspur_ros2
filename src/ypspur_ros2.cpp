@@ -153,7 +153,7 @@ void YpspurRosNode::updateDiagnostics(const rclcpp::Time now, const bool connect
       }
       else
       {
-        if (rclcpp::Time((int64_t)(t * 1000000.0), RCL_ROS_TIME) < now - rclcpp::Duration(1.0))
+        if (rclcpp::Time((int64_t)(t * 1000000000.0), RCL_ROS_TIME) < now - rclcpp::Duration(1.0))
         {
           msg.status[0].level = diagnostic_msgs::msg::DiagnosticStatus::ERROR;
           msg.status[0].message = "Motor controller doesn't "
@@ -587,7 +587,7 @@ void YpspurRosNode::spinThreadFunction(std::shared_ptr<YpspurRosNode> &node)
         }
         else
         {
-          t = ((double)rclcpp::Clock(RCL_ROS_TIME).now().nanoseconds()) / 1000000.0;
+          t = ((double)rclcpp::Clock(RCL_ROS_TIME).now().nanoseconds()) / 1000000000.0;
           if (this->cmd_vel_)
           {
             v = this->cmd_vel_->linear.x;
@@ -597,7 +597,7 @@ void YpspurRosNode::spinThreadFunction(std::shared_ptr<YpspurRosNode> &node)
           x = odom.pose.pose.position.x + dt * v * cosf(yaw);
           y = odom.pose.pose.position.y + dt * v * sinf(yaw);
         }
-        const rclcpp::Time current_stamp((int64_t)(t * 1000000.0), RCL_ROS_TIME);
+        const rclcpp::Time current_stamp((int64_t)(t * 1000000000.0), RCL_ROS_TIME);
         if (!this->avoid_publishing_duplicated_odom_ || (current_stamp > this->previous_odom_stamp_))
         {
           odom.header.stamp = current_stamp;
