@@ -744,7 +744,6 @@ int main(int argc, char ** argv)
   node->spinThreadFunction(node);
 
   RCLCPP_INFO(node->get_logger(), "rclcpp::spin(node)");
-  rclcpp::spin(node);
 
   rclcpp::shutdown();
   return 0;
